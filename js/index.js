@@ -2,10 +2,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import fragment from "./shaders/fragment.glsl";
 import vertex from "./shaders/vertex.glsl";
+import ocean from "../img/ocean.jpg";
 
 class MainScene {
   constructor(options) {
     this.container = options.dom;
+    this.time = 0;
 
     this.scene = new THREE.Scene();
 
@@ -26,26 +28,35 @@ class MainScene {
 
     this.resize();
     this.onResize();
-    this.init();
     this.addObject();
+    this.mouseMovement();
     this.render();
   }
 
-  init() {
-    this.geometry = new THREE.PlaneBufferGeometry(1.5, 1.5, 30, 30);
+  addObject() {
+    this.geometry = new THREE.PlaneBufferGeometry(1, 1, 100, 100);
     this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: this.time },
+        oTexture: { value: new THREE.TextureLoader().load(ocean) },
+      },
       side: THREE.DoubleSide,
       vertexShader: vertex,
       fragmentShader: fragment,
-      wireframe: true,
+      wireframe: false,
     });
-    this.cube = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.cube);
+    this.plane = new THREE.Mesh(this.geometry, this.material);
+    this.scene.add(this.plane);
 
-    this.camera.position.z = 5;
+    this.camera.position.z = 1;
   }
 
-  addObject() {}
+  mouseMovement() {
+    window.addEventListener("mousemove", (e) => {
+      this.mouseX = e.clientX;
+      this.mouseY = e.clientY;
+    });
+  }
 
   resize() {
     this.width = this.container.offsetWidth;
@@ -60,6 +71,8 @@ class MainScene {
   }
 
   render() {
+    this.time += 0.05;
+    this.material.uniforms.time.value = this.time;
     this.renderer.render(this.scene, this.camera);
     window.requestAnimationFrame(this.render.bind(this));
   }
