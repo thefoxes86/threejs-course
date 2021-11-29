@@ -1,5 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;800&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Playfair Display', serif;
+
+  }
+
+
 #container {
     width: 100vw;
     height: 100vh;
     margin: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: -1;
+}
+
+.center__container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.container__lists {
+    width: 1170px;
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'header header' 'post_1 post_2' 'post_3 post_4' 'post_5 post_6' 'footer footer';
+    row-gap: 20px;
+    column-gap: 4vh;
+    
+}
+
+img {
+    max-width: 100%;
+}
+
+
+.header, .post, .footer {
+    padding: 20px;
+}
+
+.header {
+    grid-area: header;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.header img {
+    object-fit: cover;
+    object-position: center center;
+}
+
+.header h1 {
+    position: absolute;
+    font-size: 86px;
+    letter-spacing: 0.8rem;
+    color: black;
+    mix-blend-mode: overlay;
+}
+
+
+.post {
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.post h2 {
+    font-size: 48px;
+    margin: 0;
+}
+
+.post p{
+    font-size: 14px;
+    color: #666666;
+    margin: 0;
+}
+
+.post span.vertical_text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    position: absolute;
+    left: 15px;
+    text-transform: uppercase;
+    color: lightgrey;
+    height: 100%;
+}
+
+.vertical span.vertical_text {
+    bottom: 12%;
+}
+
+.horizontal span.vertical_text {
+    bottom: 30%;
+}
+
+
+.post__1 {
+    grid-area: post_1;
+    position: relative;
+}
+
+.post__2 {
+    grid-area: post_2;
+    position: relative;
+}
+
+.post__3 {
+    grid-area: post_3;
+    position: relative;
+}
+
+.post__4 {
+    grid-area: post_4;
+    position: relative;
+}
+
+.post__5 {
+    grid-area: post_5;
+    position: relative;
+}
+
+.post__6 {
+    grid-area: post_6;
+    position: relative;
+}
+
+.footer {
+    grid-area: footer;
+    position: relative;
 }

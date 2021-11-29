@@ -55,7 +55,7 @@ gl_FragColor = textureVariable;
 
 When you pass a variyng attribute from vertex to fragment you have to consider that the GPU have to recalculate every vertex input for every pixel on the screen. So if the function in the vertex shader is complex it's better to declare the function inside the fragment shader and use it directly instead of pass it from the vUv
 
-###Example
+### Example
 
 ```
 // vertex shader
@@ -89,3 +89,14 @@ void main() {
 ```
 
 Here the function is declared inside the fragment shader and less hard to calculate for the GPU;
+
+
+### Distance from the center
+
+To normalized the center of the shader this is the function
+
+```
+float dist = distance(uv, vec2(0.5));
+```
+
+Remember that the shader's coordinates are like a cartesian plane so start from left bottom and arrives to right top.

@@ -14,14 +14,16 @@ class MainScene {
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
 
+    this.cameraZ = 600;
+
     this.camera = new THREE.PerspectiveCamera(
       75,
       this.width / this.height,
-      0.1,
-      1000
+      200,
+      2000
     );
 
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -34,7 +36,12 @@ class MainScene {
   }
 
   addObject() {
-    this.geometry = new THREE.PlaneBufferGeometry(1, 1, 100, 100);
+    this.geometry = new THREE.PlaneBufferGeometry(
+      this.width,
+      this.height,
+      30,
+      30
+    );
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: this.time },
@@ -43,12 +50,15 @@ class MainScene {
       side: THREE.DoubleSide,
       vertexShader: vertex,
       fragmentShader: fragment,
-      wireframe: false,
+      wireframe: true,
     });
     this.plane = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.plane);
 
-    this.camera.position.z = 1;
+    this.camera.position.z = this.cameraZ;
+
+    // The FOV is the angle in radius between the camera and the screen.
+    this.camera.fov = 2 * Math.tan(this.height / 2, this.cameraZ);
   }
 
   mouseMovement() {
