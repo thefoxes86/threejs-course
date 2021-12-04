@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "gsap": "^3.8.0",
+    "imagesloaded": "^4.1.4",
+    "scroll-js": "^3.4.2",
     "three": "^0.134.0"
   },
   "devDependencies": {

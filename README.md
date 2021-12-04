@@ -100,3 +100,65 @@ float dist = distance(uv, vec2(0.5));
 ```
 
 Remember that the shader's coordinates are like a cartesian plane so start from left bottom and arrives to right top.
+
+
+## Texture meshing ith html
+
+To merge html and scen in three js we have to position the PlaneBufferGeometry above the real img in html.
+
+First of all it's necessary calculate the fov and normalize the real width and height of the object in the scene to the real dimension in pixels. To calculate the fov this is the formula:
+
+```
+this.camera.fov = 2 * Math.atan((this.height / 2) /this.cameraZ) * (180 / Math.PI);
+```
+
+
+So create a query selector to select all the images, get the bounds client and pass it to a new PlaneBufferGeometry, then generate a new texture, pass it as a map to MeshBasicMaterial and finallyt add the mesh to the scene
+
+```
+addImages() {
+    this.imagesStore = this.images.map((img) => {
+      let bounds = img.getBoundingClientRect();
+
+      let geometry = new THREE.PlaneBufferGeometry(
+        bounds.width,
+        bounds.height,
+        1,
+        1
+      );
+      let texture = new THREE.Texture(img);
+      texture.needsUpdate = true;
+      let material = new THREE.MeshBasicMaterial({
+        map: texture,
+      });
+      let mesh = new THREE.Mesh(geometry, material);
+
+      this.scene.add(mesh);
+
+      return {
+        img: img,
+        mesh: mesh,
+        width: bounds.width,
+        height: bounds.height,
+        top: bounds.top,
+        left: bounds.left,
+      };
+    });
+  }
+```
+
+## Set positioning in the scene
+
+To set the position consdiering that out coordinates are calculated from the center of the screen this is the function 
+
+```
+setPosition() {
+    console.log(this.imagesStore);
+    this.imagesStore.forEach((o) => {
+      o.mesh.position.y = -o.top + this.height / 2 - o.height / 2;
+      o.mesh.position.x = o.left - this.width / 2 + o.width / 2;
+    });
+  }
+```
+
+
