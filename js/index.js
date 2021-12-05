@@ -6,11 +6,6 @@ import ocean from "../img/ocean.jpg";
 import imagesLoaded from "imagesloaded";
 import gsap from "gsap";
 
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-
 class MainScene {
   constructor(options) {
     this.container = options.dom;
@@ -40,7 +35,8 @@ class MainScene {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-    this.images = [...document.querySelectorAll("img")];
+    this.images = [...document.querySelectorAll(".img")];
+    this.images_hover = [...document.querySelectorAll(".img_hover")];
 
     const imagesLoad = new Promise((resolve, reject) => {
       imagesLoaded(this.images, { backround: true }, resolve);
@@ -57,13 +53,11 @@ class MainScene {
       this.resize();
       this.onResize();
       // this.addObject();
-      this.composerPass();
       this.mouseMovement();
       this.render();
 
-      window.addEventListener("mousewheel", (e) => {
+      window.addEventListener("scroll", (e) => {
         this.scrollPosition = window.scrollY;
-        this.scrollSpeed = e.wheelDelta;
         this.setPosition();
       });
     });
@@ -95,6 +89,7 @@ class MainScene {
       uniforms: {
         time: { value: 0 },
         uTexture: { value: 0 },
+        uTextureHover: { value: 0 },
         hover: { value: new THREE.Vector2(0.5, 0.5) },
         hoverState: { value: 0 },
       },
@@ -104,7 +99,7 @@ class MainScene {
     });
 
     this.materials = [];
-    this.imagesStore = this.images.map((img) => {
+    this.imagesStore = this.images.map((img, index) => {
       let bounds = img.getBoundingClientRect();
 
       let geometry = new THREE.PlaneBufferGeometry(
@@ -114,7 +109,9 @@ class MainScene {
         50
       );
       let texture = new THREE.Texture(img);
+      let texture_hover = new THREE.Texture(this.images_hover[index]);
       texture.needsUpdate = true;
+      texture_hover.needsUpdate = true;
       // let material = new THREE.MeshBasicMaterial({
       //   map: texture,
       // });
@@ -132,6 +129,7 @@ class MainScene {
       });
 
       material.uniforms.uTexture.value = texture;
+      material.uniforms.uTextureHover.value = texture_hover;
 
       let mesh = new THREE.Mesh(geometry, material);
 
@@ -154,48 +152,6 @@ class MainScene {
         this.scrollPosition - o.top + this.height / 2 - o.height / 2;
       o.mesh.position.x = o.left - this.width / 2 + o.width / 2;
     });
-  }
-
-  composerPass() {
-    this.composer = new EffectComposer(this.renderer);
-    this.renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(this.renderPass);
-
-    //custom shader pass
-    var counter = 0.0;
-    this.myEffect = {
-      uniforms: {
-        tDiffuse: { value: null },
-        scrollSpeed: { value: null },
-      },
-      vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix 
-          * modelViewMatrix 
-          * vec4( position, 1.0 );
-      }
-      `,
-      fragmentShader: `
-      uniform sampler2D tDiffuse;
-      varying vec2 vUv;
-      uniform float scrollSpeed;
-      void main(){
-        vec2 newUV = vUv;
-        float area = smoothstep(0.1,0.,vUv.y);
-        area = pow(area,6.);
-        newUV.x -= (vUv.y + 0.5)*area*abs(scrollSpeed);
-        gl_FragColor = texture2D( tDiffuse, newUV);
-        // gl_FragColor = vec4(area,0.,0.,0.8);
-      }
-      `,
-    };
-
-    this.customPass = new ShaderPass(this.myEffect);
-    this.customPass.renderToScreen = true;
-
-    this.composer.addPass(this.customPass);
   }
 
   mouseMovement() {
@@ -234,10 +190,7 @@ class MainScene {
       m.uniforms.time.value = this.time;
     });
     // this.materials.uniforms.time.value = this.time;
-    // this.renderer.render(this.scene, this.camera);
-
-    this.customPass.uniforms.scrollSpeed.value = this.scrollSpeed;
-    this.composer.render();
+    this.renderer.render(this.scene, this.camera);
 
     window.requestAnimationFrame(this.render.bind(this));
   }

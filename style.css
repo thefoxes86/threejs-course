@@ -35,10 +35,20 @@ body {
     
 }
 
-.container__lists img {
+.container__lists img.img {
     max-width: 100%;
     opacity: 0;
     overflow: hidden;
+}
+
+img.img_hover {
+    max-width: 100%;
+    opacity: 0;
+    overflow: hidden;
+    z-index: 0;
+    height: 0;
+    position: absolute;
+
 }
 
 .container_img {
