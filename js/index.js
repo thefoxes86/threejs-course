@@ -6,10 +6,16 @@ import ocean from "../img/ocean.jpg";
 import imagesLoaded from "imagesloaded";
 import gsap from "gsap";
 
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+
 class MainScene {
   constructor(options) {
     this.container = options.dom;
     this.time = 0;
+    this.scrollSpeed = 0;
 
     this.scene = new THREE.Scene();
 
@@ -51,11 +57,13 @@ class MainScene {
       this.resize();
       this.onResize();
       // this.addObject();
+      this.composerPass();
       this.mouseMovement();
       this.render();
 
-      window.addEventListener("scroll", (e) => {
+      window.addEventListener("mousewheel", (e) => {
         this.scrollPosition = window.scrollY;
+        this.scrollSpeed = e.wheelDelta;
         this.setPosition();
       });
     });
@@ -148,10 +156,52 @@ class MainScene {
     });
   }
 
+  composerPass() {
+    this.composer = new EffectComposer(this.renderer);
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.renderPass);
+
+    //custom shader pass
+    var counter = 0.0;
+    this.myEffect = {
+      uniforms: {
+        tDiffuse: { value: null },
+        scrollSpeed: { value: null },
+      },
+      vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix 
+          * modelViewMatrix 
+          * vec4( position, 1.0 );
+      }
+      `,
+      fragmentShader: `
+      uniform sampler2D tDiffuse;
+      varying vec2 vUv;
+      uniform float scrollSpeed;
+      void main(){
+        vec2 newUV = vUv;
+        float area = smoothstep(0.1,0.,vUv.y);
+        area = pow(area,6.);
+        newUV.x -= (vUv.y + 0.5)*area*abs(scrollSpeed);
+        gl_FragColor = texture2D( tDiffuse, newUV);
+        // gl_FragColor = vec4(area,0.,0.,0.8);
+      }
+      `,
+    };
+
+    this.customPass = new ShaderPass(this.myEffect);
+    this.customPass.renderToScreen = true;
+
+    this.composer.addPass(this.customPass);
+  }
+
   mouseMovement() {
     window.addEventListener("mousemove", (e) => {
-      this.mouse.x = (event.clientX / this.width) * 2 - 1;
-      this.mouse.y = -(event.clientY / this.height) * 2 + 1;
+      this.mouse.x = (e.clientX / this.width) * 2 - 1;
+      this.mouse.y = -(e.clientY / this.height) * 2 + 1;
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -184,7 +234,10 @@ class MainScene {
       m.uniforms.time.value = this.time;
     });
     // this.materials.uniforms.time.value = this.time;
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
+
+    this.customPass.uniforms.scrollSpeed.value = this.scrollSpeed;
+    this.composer.render();
 
     window.requestAnimationFrame(this.render.bind(this));
   }
