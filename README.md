@@ -161,4 +161,17 @@ setPosition() {
   }
 ```
 
+## Set scale mesh to reuse also in case of resize
+
+To set the right dimensione of the meshes is better to this method
+
+```
+// Standard method
+let geometry = new THREE.PlaneBufferGeometry(bounce.width,bounce.height,10,10);
+
+// better method
+mesh.scale.set(bounce.width,bounce.height,1)
+```
+
+
 

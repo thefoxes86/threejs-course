@@ -6,6 +6,8 @@ import ocean from "../img/ocean.jpg";
 import imagesLoaded from "imagesloaded";
 import gsap from "gsap";
 
+import noise from "./shaders/noise.glsl";
+
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
@@ -167,11 +169,17 @@ class MainScene {
       uniforms: {
         tDiffuse: { value: null },
         scrollSpeed: { value: null },
+        time: { value: 0 },
       },
       vertexShader: `
       varying vec2 vUv;
+      varying float vNoise;
+      uniform float time;
+      
       void main() {
+
         vUv = uv;
+        vNoise =  0.5 * (cnoise(vec3(vUv*10.,time * 0.25)) + 1.0);
         gl_Position = projectionMatrix 
           * modelViewMatrix 
           * vec4( position, 1.0 );
@@ -180,14 +188,18 @@ class MainScene {
       fragmentShader: `
       uniform sampler2D tDiffuse;
       varying vec2 vUv;
-      uniform float scrollSpeed;
+      uniform float time;
+
+      ${noise}
+      
+
       void main(){
         vec2 newUV = vUv;
-        float area = smoothstep(0.1,0.,vUv.y);
-        area = pow(area,6.);
-        newUV.x -= (vUv.y + 0.5)*area*abs(scrollSpeed);
+        float area = smoothstep(0.6, 1., newUV.y) * 2. - 1.;
+        float noise = 0.5 * (cnoise(vec3(vUv*10.,time * 0.25)) + 1.0);;
+        float n = smoothstep(0.5,0.51, noise * area);
         gl_FragColor = texture2D( tDiffuse, newUV);
-        // gl_FragColor = vec4(area,0.,0.,0.8);
+        gl_FragColor = vec4(n,0.,0.,1.);
       }
       `,
     };
@@ -237,6 +249,7 @@ class MainScene {
     // this.renderer.render(this.scene, this.camera);
 
     this.customPass.uniforms.scrollSpeed.value = this.scrollSpeed;
+    this.customPass.uniforms.time.value = this.time;
     this.composer.render();
 
     window.requestAnimationFrame(this.render.bind(this));
