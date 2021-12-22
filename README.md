@@ -162,3 +162,18 @@ setPosition() {
 ```
 
 
+## Set device Pixel ratio
+
+If you use the setPixelRation method othe the object render you can multiply the pixel ratio of the screen and generate a canvas with more details and quality
+
+```
+// In this case the pixel ratio is that the screen 
+this.renderer.setPixelration(window.devicePixelRatio);
+
+// In this case the pixel ratio of the device is duplicated
+this.renderer.setPixelration(2);
+
+// The best trick to perform better the GPU is that
+// In this method you are sure that the max pixel ratio will be more than 2
+this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,2))
+```

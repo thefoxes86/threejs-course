@@ -30,6 +30,7 @@ class MainScene {
       2 * Math.atan(this.height / 2 / this.cameraZ) * (180 / Math.PI);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
